@@ -1,0 +1,7 @@
+.env
+
+__pycache__/
+*.pyc
+
+first_bot.py
+http_get_test.py
