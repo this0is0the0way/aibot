@@ -12,13 +12,10 @@ from aiogram.filters import Command
 
 router = Router()
 
-# @dp.message()
-# async def any_message(message: Message,):
-#     await message.answer("Hello world")
-
 @router.message(Command("start"))
 async def cmd_start(message: Message) -> None:
-    await message.answer("Добро пожаловать!")
+    await message.answer("Добро пожаловать!\n"
+                         "Для поиска, введите запрос на английском языке.")
 
 # @router.message(Command("search"))
 # async def cmd_start(message: Message) -> None:
