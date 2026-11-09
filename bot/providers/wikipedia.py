@@ -1,11 +1,11 @@
 """
 Провайдер Wikipedia часть программы, которая полностью отвечайет за работу с API Wikipedia
 """
-#from urllib.parse import quote
 import httpx
 import html
 import re
 
+from bot.models.search_result import SearchResult
 
 def clean_snippet(text:str) -> str:
     without_tags = re.sub(r'<[^>]+>', '', text)
@@ -24,7 +24,10 @@ async def search_wiki(query:str):
                   "srsearch": query}
 
         response = await client.get("https://en.wikipedia.org/w/api.php",params=params, headers=headers)
-        
+
+        if response.status_code != 200:
+            raise Exception(f"Wikipedia API: HTTP {response.status_code}")
+
         data = response.json()
 
         try:
@@ -39,15 +42,11 @@ async def search_wiki(query:str):
             snippet = result["snippet"]
             page_id = result["pageid"]
             clean_text = clean_snippet(snippet)
-            #formatted_title = quote(title.replace(" ", "_"))
-            #url = "https://en.wikipedia.org/wiki/" + formatted_title
             url = f"https://en.wikipedia.org/wiki/?curid={str(page_id)}"
-            dict_result = {"title": title,
-                           "description": clean_text,
-                           "url": url,
-                           "source": "Wikipedia",
-                           }
-            all_results.append(dict_result)
+
+            result = SearchResult(title=title, description=clean_text, url=url, source="Wikipedia")
+            all_results.append(result)
+
             if len(all_results) == 3:
                 break
     return all_results

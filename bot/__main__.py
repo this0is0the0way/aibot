@@ -1,6 +1,6 @@
 """
 __main__.py отвечает за запуск пакета, можно запустить проект так python -m bot
-__main__.py -специальное имя файла, которое понимает Python
+__main__.py специальное имя файла, которое понимает Python
 """
 import asyncio
 from os import getenv
@@ -10,7 +10,7 @@ from bot.handlers.search import router
 
 load_dotenv()
 
-dp = Dispatcher()
+dp = Dispatcher(semaphore = asyncio.Semaphore(6))
 #подключение роутеров из файла, где лежат сами хендлеры. Диспетчер - Роутер - Хендлер
 dp.include_router(router)
 

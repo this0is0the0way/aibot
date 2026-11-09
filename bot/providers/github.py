@@ -3,6 +3,8 @@
 """
 import httpx
 
+from bot.models.search_result import GitHubResult
+
 async def search_github(query:str):
     async with httpx.AsyncClient() as client:
         headers = {"Accept": "application/vnd.github.v3+json",
@@ -14,6 +16,9 @@ async def search_github(query:str):
                                         #ednpoint
         response = await client.get("https://api.github.com/search/repositories", headers=headers, params=params)
 
+        if response.status_code != 200:
+            raise Exception(f"GitHub API: HTTP {response.status_code}")
+
         data = response.json()
 
         try:
@@ -24,17 +29,13 @@ async def search_github(query:str):
         all_results = []
 
         for item in search_result:
-            title = item["name"]
+            title = item["full_name"]
             description = item["description"]
             stars = item["stargazers_count"]
             language = item["language"]
             url = item["html_url"]
-            dict_result = {"title": title,
-                           "description": description,
-                           "url": url,
-                           "source": "GitHub",
-                           "stars": stars,
-                           "language": language,
-                       }
-            all_results.append(dict_result)
+
+            result = GitHubResult(title=title, description=description, url=url, source="GitHub",
+                                  stars=stars, language=language)
+            all_results.append(result)
     return all_results

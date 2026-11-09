@@ -3,15 +3,20 @@
 """
 import httpx
 
+from bot.models.search_result import StackOverFlowResult
+
 async def search_stack_ov_fl(query:str):
     async with httpx.AsyncClient() as client:
         headers = {"User-Agent": "StudyBotTg/0.1 (studybot@gmail.com) generic-library/0.0"}
 
         params = {"q": query,
+                  "pagesize": 3,
                   "site": "stackoverflow"}
 
-
         response = await client.get("https://api.stackexchange.com/2.3/search/advanced", params=params, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception(f"StackOverFlow API: HTTP {response.status_code}")
 
         data = response.json()
 
@@ -34,15 +39,7 @@ async def search_stack_ov_fl(query:str):
             else:
                 accepted_answer = True
 
-            dict_result = {"title": title,
-                           "url": url,
-                           "answer_count": answer_count,
-                           "score": score,
-                           "accepted_answer": accepted_answer,
-                           "source": "StackOverFlow",
-                           "description": None
-                           }
-            all_results.append(dict_result)
-            if len(all_results) == 3:
-                break
+            result = StackOverFlowResult(title=title, url=url, description=None, source="StackOverFlow",
+                                         answer_count=answer_count, score=score, accepted_answer=accepted_answer)
+            all_results.append(result)
     return all_results
